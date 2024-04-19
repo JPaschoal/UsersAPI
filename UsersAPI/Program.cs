@@ -22,7 +22,7 @@ builder.Services
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-builder.Services.AddScoped<AddUserService>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddControllers();
 
