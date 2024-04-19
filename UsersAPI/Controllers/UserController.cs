@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using UsersAPI.Data.Dtos;
+using UsersAPI.Models;
 
 namespace UsersAPI.Controllers;
 
@@ -7,9 +10,23 @@ namespace UsersAPI.Controllers;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    [HttpPost]
-    public IActionResult AddUser(CreateUserDto user)
+    private IMapper _mapper;
+    private UserManager<User> _userManager;
+
+    public UserController(IMapper mapper, UserManager<User> userManager)
     {
-        throw new NotImplementedException();
+        _mapper = mapper;
+        _userManager = userManager;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddUser(CreateUserDto dto)
+    {
+        User user = _mapper.Map<User>(dto);
+        IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
+
+        if (result.Succeeded) return Ok("User created successfully");
+
+        throw new Exception("Failed to create user");
     }
 }
