@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UsersAPI.Data.Dtos;
 using UsersAPI.Models;
+using UsersAPI.Services;
 
 namespace UsersAPI.Controllers;
 
@@ -10,23 +11,17 @@ namespace UsersAPI.Controllers;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    private IMapper _mapper;
-    private UserManager<User> _userManager;
+    private AddUserService _addUserService;
 
-    public UserController(IMapper mapper, UserManager<User> userManager)
+    public UserController(AddUserService addUserService)
     {
-        _mapper = mapper;
-        _userManager = userManager;
+        _addUserService = addUserService;
     }
 
     [HttpPost]
     public async Task<IActionResult> AddUser(CreateUserDto dto)
     {
-        User user = _mapper.Map<User>(dto);
-        IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
-
-        if (result.Succeeded) return Ok("User created successfully");
-
-        throw new Exception("Failed to create user");
+        await _addUserService.Add(dto);
+        return Ok("User created successfully");
     }
 }
