@@ -1,9 +1,5 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UsersAPI.Data.Dtos;
-using UsersAPI.Models;
 using UsersAPI.Services;
 
 namespace UsersAPI.Controllers;
@@ -28,7 +24,8 @@ public class UserController : ControllerBase
     [HttpPost("Login")]
     public async Task<IActionResult> Login(LoginUserDto dto)
     {
-        await _userService.Login(dto);
-        return Ok("User logged in successfully");
+        var token = await _userService.Login(dto);
+
+        return Ok(token);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using UsersAPI.Data.Dtos;
 using UsersAPI.Models;
 
@@ -10,12 +11,14 @@ public class UserService
     private IMapper _mapper;
     private UserManager<User> _userManager;
     private SignInManager<User> _signInManager;
+    private TokenService _tokenSerivce;
 
-    public UserService(IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager)
+    public UserService(IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager, TokenService tokenService)
     {
         _mapper = mapper;
         _userManager = userManager;
         _signInManager = signInManager;
+        _tokenSerivce = tokenService;
     }
 
     public async Task Register(CreateUserDto dto)
@@ -29,13 +32,18 @@ public class UserService
         }
     }
 
-    public async Task Login(LoginUserDto dto)
+    public async Task<string> Login(LoginUserDto dto)
     {
         var result = await _signInManager.PasswordSignInAsync(dto.Username, dto.Password, false, false);
 
-        if (!result.Succeeded)
-        {
-            throw new ApplicationException("User not authenticated");
-        }
+        if (!result.Succeeded) throw new ApplicationException("User not authenticated");
+
+        var user = _signInManager
+            .UserManager
+            .Users.FirstOrDefault(user => user.NormalizedUserName == dto.Username.ToUpper());
+
+        var token = _tokenSerivce.GenerateToken(user);
+
+        return token;
     }
 }
